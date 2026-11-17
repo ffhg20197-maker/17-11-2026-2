@@ -1,0 +1,8 @@
+# Place this file in wp-content/uploads/ (Apache 2.4+).
+# Prevent execution/access of PHP-family scripts uploaded by users.
+
+<FilesMatch "(?i)\.(php[0-9]?|phtml|phar|phps)$">
+    Require all denied
+</FilesMatch>
+
+Options -ExecCGI
