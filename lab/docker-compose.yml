@@ -1,0 +1,37 @@
+services:
+  db:
+    image: mariadb:11
+    restart: unless-stopped
+    environment:
+      MARIADB_DATABASE: ${MYSQL_DATABASE:-wordpress}
+      MARIADB_USER: ${MYSQL_USER:-wpuser}
+      MARIADB_PASSWORD: ${MYSQL_PASSWORD:-change-this-local-password}
+      MARIADB_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-change-this-root-password}
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+  wordpress:
+    image: wordpress:php8.2-apache
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${WORDPRESS_PORT:-8080}:80"
+    environment:
+      WORDPRESS_DB_HOST: db:3306
+      WORDPRESS_DB_USER: ${MYSQL_USER:-wpuser}
+      WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-change-this-local-password}
+      WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
+    volumes:
+      - wordpress_data:/var/www/html
+      - ./apache/root-hardening.htaccess:/var/www/html/.htaccess:ro
+      - ./apache/uploads.htaccess:/var/www/html/wp-content/uploads/.htaccess:ro
+      - ./config/wp-config-extra.php:/usr/local/etc/php/conf.d/zz-wp-hardening.ini:ro
+    restart: unless-stopped
+volumes:
+  db_data:
+  wordpress_data:
