@@ -68,7 +68,7 @@ jobs:
         run: |
           export COMPOSE_PROJECT_NAME=wpsec
           WP_CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
-          docker run --rm --network wpsec_default --volumes-from "$WP_CID" \
+          docker run --rm --user 0:0 --network wpsec_default --volumes-from "$WP_CID" \
             -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \
             -e WORDPRESS_DB_PASSWORD=ci-wp-password-2026 -e WORDPRESS_DB_NAME=wordpress \
             wordpress:cli-php8.2 \
