@@ -18,7 +18,7 @@
 ```bash
 cp lab/.env.example lab/.env
 # Отредактируйте .env: задайте собственные уникальные пароли.
-docker compose -f lab/docker-compose.yml up -d
+docker compose --env-file lab/.env -f lab/docker-compose.yml up -d
 ```
 Завершите установку на http://localhost:8080, затем выполните:
 ```bash
