@@ -6,7 +6,7 @@
 ## Быстрый старт (Docker Compose)
 Требуются Docker Desktop/Engine и Docker Compose v2. Выполнять команды из корня репозитория:
 ```bash
-cp lab/.env.example .env
+cp lab/.env.example lab/.env
 # Обязательно замените локальные пароли в .env
 docker compose -f lab/docker-compose.yml up -d
 ```
