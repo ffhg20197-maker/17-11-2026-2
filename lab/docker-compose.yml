@@ -34,7 +34,7 @@ services:
         $$table_prefix = 'sec_lab_';
     volumes:
       - wordpress_data:/var/www/html
-      - ./apache/root-hardening.htaccess:/var/www/html/.htaccess:ro
+      - ./apache/root-hardening.htaccess:/var/www/html/.htaccess
       - ./apache/uploads.htaccess:/usr/local/etc/wp-hardening-uploads.htaccess:ro
     restart: unless-stopped
 volumes:
