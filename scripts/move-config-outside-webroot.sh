@@ -41,4 +41,5 @@ else
 fi
 
 config_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/wp-config.php")"
-echo "Direct /wp-config.php HTTP: $config_code (expected 404 after move; before move the .htaccess rule returns 403)."
+echo "Direct /wp-config.php HTTP: $config_code (expected 403 or 404; configuration remains inaccessible after move)."
+[[ "$config_code" = 403 || "$config_code" = 404 ]] || { echo "FAIL: wp-config.php is publicly reachable (HTTP $config_code)." >&2; exit 1; }
