@@ -1,4 +1,5 @@
 .env
+lab/.env
 *.sql
 *.sql.gz
 *.bak
