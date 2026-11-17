@@ -10,8 +10,8 @@
 2. Обязательно замените оба пароля в `.env` на длинные уникальные значения.
 3. Запустите стенд:
    ```bash
-   docker compose -f lab/docker-compose.yml up -d
-   docker compose -f lab/docker-compose.yml ps
+   docker compose --env-file lab/.env -f lab/docker-compose.yml up -d
+   docker compose --env-file lab/.env -f lab/docker-compose.yml ps
    ```
 4. Откройте http://localhost:8080 и завершите установку WordPress. При установке используйте отдельную лабораторную учётную запись администратора.
 5. Проверьте, что сайт и /wp-login.php открываются.
@@ -59,10 +59,10 @@ bash scripts/move-config-outside-webroot.sh
 ## 7. Завершение лаборатории
 Для остановки:
 ```bash
-docker compose -f lab/docker-compose.yml down
+docker compose --env-file lab/.env -f lab/docker-compose.yml down
 ```
 Для удаления контейнеров вместе с данными лабораторной БД (необратимо):
 ```bash
-docker compose -f lab/docker-compose.yml down -v
+docker compose --env-file lab/.env -f lab/docker-compose.yml down -v
 ```
 На публичном production-сайте после лабораторной диагностики выключите WP_DEBUG и храните логи вне публичного доступа. На Nginx .htaccess не работает — эквивалентные правила нужно задавать в конфигурации Nginx.
