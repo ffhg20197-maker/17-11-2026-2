@@ -1,0 +1,7 @@
+.env
+*.sql
+*.sql.gz
+*.bak
+*.zip
+wp-config.php
+debug.log
