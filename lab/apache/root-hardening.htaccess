@@ -1,11 +1,20 @@
-# Apache 2.4+; preserve WordPress rewrite rules when adapting to an existing site.
+# Apache 2.4+ WordPress root protection. Keep standard rewrite rules for permalinks.
 <Files "wp-config.php">
     Require all denied
 </Files>
-<FilesMatch "^(\\.htaccess|\\.htpasswd|readme\\.html|license\\.txt)$">
+<FilesMatch "^(\\.htaccess|\\.htpasswd|readme\\.html|license\\.txt|debug\\.log)$">
     Require all denied
 </FilesMatch>
 <FilesMatch "\\.(sql|bak|old|orig|save|swp|zip|tar|gz)$">
     Require all denied
 </FilesMatch>
 Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+RewriteBase /
+RewriteRule ^index\\.php$ - [L]
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule . /index.php [L]
+</IfModule>
