@@ -28,8 +28,8 @@ mv "$SOURCE" "$ROLLBACK"
 echo "Parent config staged; document-root config temporarily moved for verification."
 '
 
-home_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/")"
-login_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/wp-login.php")"
+home_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/")"
+login_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/wp-login.php")"
 if [[ "$home_code" =~ ^2[0-9][0-9]$ && "$login_code" =~ ^2[0-9][0-9]$ ]]; then
   docker exec "$CONTAINER" rm -f /var/www/wp-config.php.rollback
   echo "PASS: WordPress homepage ($home_code) and login ($login_code) work with parent config."
@@ -40,5 +40,5 @@ else
   exit 1
 fi
 
-config_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/wp-config.php")"
+config_code="$(curl -L -sS -o /dev/null -w '%{http_code}' "$BASE/wp-config.php")"
 echo "Direct /wp-config.php HTTP: $config_code (expected 404 after move; before move the .htaccess rule returns 403)."
