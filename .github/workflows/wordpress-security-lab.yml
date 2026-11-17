@@ -66,6 +66,7 @@ jobs:
       - name: Verify WordPress constants and table prefix
         shell: bash
         run: |
+          export COMPOSE_PROJECT_NAME=wpsec
           WP_CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
           docker run --rm --network wpsec_default --volumes-from "$WP_CID" \
             -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \
