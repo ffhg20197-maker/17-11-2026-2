@@ -26,12 +26,12 @@ services:
       WORDPRESS_DB_USER: ${MYSQL_USER:-wpuser}
       WORDPRESS_DB_PASSWORD: ${MYSQL_PASSWORD:-change-this-local-password}
       WORDPRESS_DB_NAME: ${MYSQL_DATABASE:-wordpress}
+      WORDPRESS_TABLE_PREFIX: sec_lab_
+      WORDPRESS_DEBUG: "1"
       WORDPRESS_CONFIG_EXTRA: |
         define('DISALLOW_FILE_EDIT', true);
-        define('WP_DEBUG', true);
         define('WP_DEBUG_DISPLAY', false);
         define('WP_DEBUG_LOG', true);
-        $$table_prefix = 'sec_lab_';
     volumes:
       - wordpress_data:/var/www/html
       - ./apache/root-hardening.htaccess:/var/www/html/.htaccess
