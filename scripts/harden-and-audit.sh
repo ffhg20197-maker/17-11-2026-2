@@ -12,6 +12,7 @@ rm -f "$ROOT/readme.html" "$ROOT/license.txt"
 find "$ROOT" -maxdepth 1 -type f \( -name '*.sql' -o -name '*.zip' -o -name '*.bak' \) -delete
 find "$ROOT" -type d -exec chmod 755 {} +
 find "$ROOT" -type f -exec chmod 644 {} +
+chown www-data:www-data "$ROOT/wp-config.php"
 chmod 440 "$ROOT/wp-config.php"
 mkdir -p "$ROOT/wp-content/uploads"
 install -m 644 /usr/local/etc/wp-hardening-uploads.htaccess "$ROOT/wp-content/uploads/.htaccess"
