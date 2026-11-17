@@ -17,34 +17,28 @@ set -euo pipefail
 ROOT=/var/www/html
 SOURCE="$ROOT/wp-config.php"
 TARGET=/var/www/wp-config.php
+ROLLBACK=/var/www/wp-config.php.rollback
 
-if [[ ! -f "$SOURCE" ]]; then
-  echo "Expected config not found in $SOURCE" >&2
-  exit 3
-fi
-if [[ -e "$TARGET" ]]; then
-  echo "Refusing to overwrite existing $TARGET" >&2
-  exit 4
-fi
+[[ -f "$SOURCE" ]] || { echo "Expected config not found: $SOURCE" >&2; exit 3; }
+[[ ! -e "$TARGET" && ! -e "$ROLLBACK" ]] || { echo "Parent config or rollback file already exists; refusing to overwrite." >&2; exit 4; }
 
 cp -a "$SOURCE" "$TARGET"
 chmod 440 "$TARGET"
-# Keep a rollback copy in the web root until HTTP smoke tests pass.
-echo "Config copied to parent directory; original retained for rollback."
+mv "$SOURCE" "$ROLLBACK"
+echo "Parent config staged; document-root config temporarily moved for verification."
 '
 
 home_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/")"
 login_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/wp-login.php")"
 if [[ "$home_code" =~ ^2[0-9][0-9]$ && "$login_code" =~ ^2[0-9][0-9]$ ]]; then
-  docker exec "$CONTAINER" rm -f /var/www/html/wp-config.php
+  docker exec "$CONTAINER" rm -f /var/www/wp-config.php.rollback
   echo "PASS: WordPress homepage ($home_code) and login ($login_code) work with parent config."
   echo "Parent config: /var/www/wp-config.php (mode 440)."
 else
   echo "FAIL: homepage=$home_code, wp-login=$login_code. Rolling back."
-  docker exec "$CONTAINER" bash -lc 'if [[ -f /var/www/wp-config.php && ! -f /var/www/html/wp-config.php ]]; then cp -a /var/www/wp-config.php /var/www/html/wp-config.php; fi'
+  docker exec "$CONTAINER" bash -lc 'if [[ -f /var/www/wp-config.php.rollback ]]; then mv /var/www/wp-config.php.rollback /var/www/html/wp-config.php; fi; rm -f /var/www/wp-config.php'
   exit 1
 fi
 
-# Once moved, direct URL should be 404 because the file is no longer inside DocumentRoot.
 config_code="$(curl -sS -o /dev/null -w '%{http_code}' "$BASE/wp-config.php")"
 echo "Direct /wp-config.php HTTP: $config_code (expected 404 after move; before move the .htaccess rule returns 403)."
