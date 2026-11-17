@@ -15,6 +15,8 @@ find "$ROOT" -type f -exec chmod 644 {} +
 chmod 440 "$ROOT/wp-config.php"
 mkdir -p "$ROOT/wp-content/uploads"
 install -m 644 /usr/local/etc/wp-hardening-uploads.htaccess "$ROOT/wp-content/uploads/.htaccess"
+chown www-data:www-data "$ROOT/wp-content/uploads"
+chmod 755 "$ROOT/wp-content/uploads"
 chmod 644 "$ROOT/.htaccess" "$ROOT/wp-content/uploads/.htaccess"
 echo "Hardening applied. Config permissions: $(stat -c %a "$ROOT/wp-config.php")"
 IN
