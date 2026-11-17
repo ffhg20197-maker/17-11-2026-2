@@ -86,7 +86,9 @@ jobs:
           docker exec -u www-data "$WP_CID" test -w /var/www/html/wp-content/uploads
           test "$(docker exec "$WP_CID" stat -c %a /var/www/html/wp-config.php)" = "440"
           docker exec "$WP_CID" bash -lc 'test ! -e /var/www/html/readme.html && test ! -e /var/www/html/license.txt'
-          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -maxdepth 1 -type f \\( -name "*.sql" -o -name "*.zip" -o -name "*.bak" \\) -print -quit)"'
+          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -maxdepth 1 -type f -name "*.sql" -print -quit)"'
+          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -maxdepth 1 -type f -name "*.zip" -print -quit)"'
+          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -maxdepth 1 -type f -name "*.bak" -print -quit)"'
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type d ! -perm 755 -print -quit)"'
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type f ! -name wp-config.php ! -perm 644 -print -quit)"'
 
