@@ -8,7 +8,7 @@
 ```bash
 cp lab/.env.example lab/.env
 # Обязательно замените локальные пароли в .env
-docker compose -f lab/docker-compose.yml up -d
+docker compose --env-file lab/.env -f lab/docker-compose.yml up -d
 ```
 Откройте http://localhost:8080 и завершите установку WordPress. После установки:
 ```bash
