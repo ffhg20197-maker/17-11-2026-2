@@ -1,0 +1,92 @@
+name: WordPress security lab
+
+on:
+  push:
+    paths:
+      - "lab/**"
+      - "scripts/**"
+      - ".github/workflows/wordpress-security-lab.yml"
+  workflow_dispatch:
+
+jobs:
+  hardening-smoke-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Start disposable WordPress and MariaDB
+        shell: bash
+        run: |
+          cat > .env <<'ENV'
+          MYSQL_DATABASE=wordpress
+          MYSQL_USER=wpuser
+          MYSQL_PASSWORD=ci-wp-password-2026
+          MYSQL_ROOT_PASSWORD=ci-root-password-2026
+          WORDPRESS_PORT=8080
+          ENV
+          export COMPOSE_PROJECT_NAME=wpsec
+          docker compose -f lab/docker-compose.yml up -d
+          for i in $(seq 1 60); do
+            CID="$(docker compose -f lab/docker-compose.yml ps -q wordpress)"
+            if [ -n "$CID" ] && docker exec "$CID" test -f /var/www/html/wp-config.php; then
+              break
+            fi
+            sleep 3
+          done
+          test -n "$CID"
+          docker exec "$CID" test -f /var/www/html/wp-config.php
+
+      - name: Install WordPress for the lab
+        shell: bash
+        run: |
+          export COMPOSE_PROJECT_NAME=wpsec
+          docker run --rm --network wpsec_default \
+            -v wpsec_wordpress_data:/var/www/html \
+            wordpress:cli-php8.2 \
+            wp core install --path=/var/www/html \
+              --url=http://localhost:8080 \
+              --title="WordPress Security Lab" \
+              --admin_user=labadmin \
+              --admin_password='CI-only-NotForProduction-2026!' \
+              --admin_email=lab@example.invalid \
+              --skip-email --allow-root
+
+      - name: Apply filesystem and configuration hardening
+        shell: bash
+        run: |
+          export COMPOSE_PROJECT_NAME=wpsec
+          bash scripts/harden-and-audit.sh | tee hardening.log
+
+      - name: Verify WordPress constants and table prefix
+        shell: bash
+        run: |
+          docker run --rm --network wpsec_default \
+            -v wpsec_wordpress_data:/var/www/html \
+            wordpress:cli-php8.2 \
+            wp eval 'echo (DISALLOW_FILE_EDIT ? "DISALLOW_FILE_EDIT=ON" : "DISALLOW_FILE_EDIT=OFF").PHP_EOL; echo "WP_DEBUG=".(WP_DEBUG ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_DISPLAY=".(WP_DEBUG_DISPLAY ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_LOG=".(WP_DEBUG_LOG ? "ON" : "OFF").PHP_EOL; global $wpdb; echo "TABLE_PREFIX=".$wpdb->prefix.PHP_EOL;' \
+              --path=/var/www/html --allow-root | tee constants.log
+
+      - name: Verify HTTP 403 protections
+        shell: bash
+        run: |
+          export COMPOSE_PROJECT_NAME=wpsec
+          BASE_URL=http://localhost:8080 bash scripts/http-security-test.sh | tee http-tests.log
+
+      - name: Move wp-config outside DocumentRoot and verify site
+        shell: bash
+        run: |
+          export COMPOSE_PROJECT_NAME=wpsec
+          BASE_URL=http://localhost:8080 bash scripts/move-config-outside-webroot.sh | tee config-move.log
+
+      - name: Upload test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: wordpress-security-lab-results
+          path: |
+            hardening.log
+            constants.log
+            http-tests.log
+            config-move.log
+          if-no-files-found: ignore
