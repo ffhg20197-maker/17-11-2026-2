@@ -26,9 +26,9 @@ jobs:
           WORDPRESS_PORT=8080
           ENV
           export COMPOSE_PROJECT_NAME=wpsec
-          docker compose -f lab/docker-compose.yml up -d
+          docker compose --env-file lab/.env -f lab/docker-compose.yml up -d
           for i in $(seq 1 60); do
-            CID="$(docker compose -f lab/docker-compose.yml ps -q wordpress)"
+            CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
             if [ -n "$CID" ] && docker exec "$CID" test -f /var/www/html/wp-config.php; then
               break
             fi
@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           export COMPOSE_PROJECT_NAME=wpsec
-          WP_CID="$(docker compose -f lab/docker-compose.yml ps -q wordpress)"
+          WP_CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
           echo "WordPress container: $WP_CID"
           docker exec "$WP_CID" sh -lc 'grep -E "DB_HOST|DB_NAME|DB_USER" /var/www/html/wp-config.php || true'
           docker exec "$WP_CID" sh -lc 'env | grep "^WORDPRESS_DB_" || true'
@@ -66,7 +66,7 @@ jobs:
       - name: Verify WordPress constants and table prefix
         shell: bash
         run: |
-          WP_CID="$(docker compose -f lab/docker-compose.yml ps -q wordpress)"
+          WP_CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
           docker run --rm --network wpsec_default --volumes-from "$WP_CID" \
             -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \
             -e WORDPRESS_DB_PASSWORD=ci-wp-password-2026 -e WORDPRESS_DB_NAME=wordpress \
