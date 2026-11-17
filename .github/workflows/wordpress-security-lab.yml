@@ -78,6 +78,13 @@ jobs:
             wordpress:cli-php8.2 \
             wp eval 'echo (DISALLOW_FILE_EDIT ? "DISALLOW_FILE_EDIT=ON" : "DISALLOW_FILE_EDIT=OFF").PHP_EOL; echo "WP_DEBUG=".(WP_DEBUG ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_DISPLAY=".(WP_DEBUG_DISPLAY ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_LOG=".(WP_DEBUG_LOG ? "ON" : "OFF").PHP_EOL; global $wpdb; echo "TABLE_PREFIX=".$wpdb->prefix.PHP_EOL;' \
               --path=/var/www/html --allow-root | tee constants.log
+          grep -qx "DISALLOW_FILE_EDIT=ON" constants.log
+          grep -qx "WP_DEBUG=ON" constants.log
+          grep -qx "WP_DEBUG_DISPLAY=OFF" constants.log
+          grep -qx "WP_DEBUG_LOG=ON" constants.log
+          grep -qx "TABLE_PREFIX=sec_lab_" constants.log
+          docker exec -u www-data "$WP_CID" test -w /var/www/html/wp-content/uploads
+          test "$(docker exec "$WP_CID" stat -c %a /var/www/html/wp-config.php)" = "440"
 
       - name: Verify HTTP 403 protections
         shell: bash
