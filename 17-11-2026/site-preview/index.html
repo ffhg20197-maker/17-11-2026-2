@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>WordPress Security Lab — демонстрация</title>
+<style>
+:root{font-family:Inter,Arial,sans-serif;color:#172033;background:#f4f7fb}*{box-sizing:border-box}
+body{margin:0}.top{background:#172b4d;color:#fff;padding:28px max(24px,calc((100% - 1050px)/2))}
+main{max-width:1050px;margin:28px auto;padding:0 20px}.tag{display:inline-block;background:#dff7e9;color:#146c43;padding:6px 10px;border-radius:20px;font-size:12px;font-weight:700}
+h1{margin:8px 0;font-size:28px}.muted{color:#65748b}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin:22px 0}
+.card{background:white;border:1px solid #e1e8f0;border-radius:14px;padding:18px;box-shadow:0 4px 14px #102a430b}
+.card h3{margin:0 0 8px;font-size:16px}.num{font-size:26px;font-weight:800;color:#146c43}
+code{background:#f0f3f8;padding:2px 5px;border-radius:4px}.notice{border-left:4px solid #e0a126;background:#fff8e8;padding:14px;border-radius:8px}
+footer{margin-top:28px;color:#718096;font-size:13px}
+</style></head>
+<body>
+<header class="top"><div>SECURITY LAB / WORDPRESS</div><h1>Аудит файловой структуры CMS</h1><div style="opacity:.8">Практическая работа 3.2.49 · 17 ноября 2026</div></header>
+<main>
+<span class="tag">Учебный макет интерфейса</span>
+<p class="muted">Панель демонстрирует состав подготовленного проекта. Это статическая HTML-страница, а не подключённая административная панель WordPress.</p>
+<section class="grid">
+<div class="card"><h3>Защита конфигурации</h3><div class="num">400 / 440</div><p class="muted">Рекомендуемые права wp-config.php</p></div>
+<div class="card"><h3>Uploads</h3><div class="num">PHP DENY</div><p class="muted">Запрет исполнения PHP через .htaccess</p></div>
+<div class="card"><h3>Админ-редактор</h3><div class="num">OFF</div><p class="muted">DISALLOW_FILE_EDIT</p></div>
+<div class="card"><h3>Логирование</h3><div class="num">HIDDEN</div><p class="muted">WP_DEBUG_DISPLAY=false</p></div>
+</section>
+<div class="card"><h3>Контрольный список</h3><p>□ Очистка web-root · □ CHMOD · □ HTTP 403 · □ запрет PHP в uploads · □ проверка wp-admin · □ безопасное логирование · □ перенос wp-config.php · □ аудит префикса БД</p></div>
+<p class="notice"><b>Важно:</b> индикаторы выше показывают требуемую конфигурацию, а не результаты реального сканирования сервера. Для отчёта используйте снимки вашей лабораторной установки.</p>
+<footer>Исходный проект: ffhg20197-maker/17-11-2026-2 · Статическая демонстрация</footer>
+</main></body></html>
