@@ -1,0 +1,13 @@
+# WordPress security hardening — Apache 2.4+
+# Keep the standard WordPress rewrite rules below this section if needed.
+
+<FilesMatch "^(wp-config\.php|\.htaccess|\.htpasswd|readme\.html|license\.txt)$">
+    Require all denied
+</FilesMatch>
+
+Options -Indexes
+
+# Block common backup and database dump extensions from HTTP access.
+<FilesMatch "(?i)\.(sql|bak|old|orig|save|swp|zip|tar|gz)$">
+    Require all denied
+</FilesMatch>
