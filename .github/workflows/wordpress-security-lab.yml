@@ -85,6 +85,10 @@ jobs:
           grep -qx "TABLE_PREFIX=sec_lab_" constants.log
           docker exec -u www-data "$WP_CID" test -w /var/www/html/wp-content/uploads
           test "$(docker exec "$WP_CID" stat -c %a /var/www/html/wp-config.php)" = "440"
+          docker exec "$WP_CID" bash -lc 'test ! -e /var/www/html/readme.html && test ! -e /var/www/html/license.txt'
+          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -maxdepth 1 -type f \\( -name "*.sql" -o -name "*.zip" -o -name "*.bak" \\) -print -quit)"'
+          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type d ! -perm 755 -print -quit)"'
+          docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type f ! -name wp-config.php ! -perm 644 -print -quit)"'
 
       - name: Verify HTTP 403 protections
         shell: bash
@@ -97,6 +101,9 @@ jobs:
         run: |
           export COMPOSE_PROJECT_NAME=wpsec
           BASE_URL=http://localhost:8080 bash scripts/move-config-outside-webroot.sh | tee config-move.log
+          WP_CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
+          docker exec "$WP_CID" test -f /var/www/wp-config.php
+          docker exec "$WP_CID" test ! -e /var/www/html/wp-config.php
 
       - name: Upload test evidence
         if: always()
