@@ -18,7 +18,7 @@ jobs:
       - name: Start disposable WordPress and MariaDB
         shell: bash
         run: |
-          cat > .env <<'ENV'
+          cat > lab/.env <<'ENV'
           MYSQL_DATABASE=wordpress
           MYSQL_USER=wpuser
           MYSQL_PASSWORD=ci-wp-password-2026
