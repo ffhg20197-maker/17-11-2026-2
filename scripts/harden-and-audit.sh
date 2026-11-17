@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Run from repository root after Docker WordPress has completed installation.
 set -euo pipefail
-CONTAINER="${WP_CONTAINER:-$(docker compose -f lab/docker-compose.yml ps -q wordpress)}"
+CONTAINER="${WP_CONTAINER:-$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)}"
 [ -n "$CONTAINER" ] || { echo "WordPress container not running"; exit 2; }
 echo "Applying lab hardening directives and filesystem modes..."
 docker exec -i "$CONTAINER" bash -s <<'IN'
