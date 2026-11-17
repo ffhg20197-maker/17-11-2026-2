@@ -3,7 +3,7 @@
 # Run only after WordPress installation and after creating a database/files backup.
 set -euo pipefail
 
-COMPOSE=(docker compose -f lab/docker-compose.yml)
+COMPOSE=(docker compose --env-file lab/.env -f lab/docker-compose.yml)
 CONTAINER="${WP_CONTAINER:-$("${COMPOSE[@]}" ps -q wordpress)}"
 BASE="${BASE_URL:-http://localhost:8080}"
 
