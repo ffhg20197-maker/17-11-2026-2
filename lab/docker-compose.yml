@@ -29,8 +29,7 @@ services:
     volumes:
       - wordpress_data:/var/www/html
       - ./apache/root-hardening.htaccess:/var/www/html/.htaccess:ro
-      - ./apache/uploads.htaccess:/var/www/html/wp-content/uploads/.htaccess:ro
-      - ./config/wp-config-extra.php:/usr/local/etc/php/conf.d/zz-wp-hardening.ini:ro
+      - ./apache/uploads.htaccess:/opt/wp-hardening/uploads.htaccess:ro
     restart: unless-stopped
 volumes:
   db_data:
