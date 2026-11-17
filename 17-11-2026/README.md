@@ -16,7 +16,7 @@
 ## Запуск
 Из корня репозитория:
 ```bash
-cp lab/.env.example .env
+cp lab/.env.example lab/.env
 # Отредактируйте .env: задайте собственные уникальные пароли.
 docker compose -f lab/docker-compose.yml up -d
 ```
