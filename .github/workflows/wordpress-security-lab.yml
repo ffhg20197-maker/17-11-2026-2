@@ -73,7 +73,7 @@ jobs:
           docker run --rm --user 0:0 --network wpsec_default --volumes-from "$WP_CID" \
             -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \
             -e WORDPRESS_DB_PASSWORD=ci-wp-password-2026 -e WORDPRESS_DB_NAME=wordpress \
-            -e WORDPRESS_TABLE_PREFIX=sec_lab_ \
+            -e WORDPRESS_TABLE_PREFIX=sec_lab_ -e WORDPRESS_DEBUG=1 \
             wordpress:cli-php8.2 \
             wp eval 'echo (DISALLOW_FILE_EDIT ? "DISALLOW_FILE_EDIT=ON" : "DISALLOW_FILE_EDIT=OFF").PHP_EOL; echo "WP_DEBUG=".(WP_DEBUG ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_DISPLAY=".(WP_DEBUG_DISPLAY ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_LOG=".(WP_DEBUG_LOG ? "ON" : "OFF").PHP_EOL; global $wpdb; echo "TABLE_PREFIX=".$wpdb->prefix.PHP_EOL;' \
               --path=/var/www/html --allow-root | tee constants.log
