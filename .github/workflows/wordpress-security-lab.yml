@@ -91,6 +91,20 @@ jobs:
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type d ! -perm 755 -print -quit)"'
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type f ! -name wp-config.php ! -perm 644 -print -quit)"'
 
+      - name: Verify theme and plugin editor menus are hidden
+        shell: bash
+        run: |
+          export COMPOSE_PROJECT_NAME=wpsec
+          WP_CID="$(docker compose --env-file lab/.env -f lab/docker-compose.yml ps -q wordpress)"
+          docker run --rm --user 0:0 --network wpsec_default --volumes-from "$WP_CID" \\
+            -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \\
+            -e WORDPRESS_DB_PASSWORD=ci-wp-password-2026 -e WORDPRESS_DB_NAME=wordpress \\
+            -e WORDPRESS_TABLE_PREFIX=sec_lab_ -e WORDPRESS_DEBUG=1 \\
+            wordpress:cli-php8.2 \\
+            wp eval 'wp_set_current_user(1); require_once ABSPATH . "wp-admin/includes/menu.php"; global $menu; $slugs = array_column($menu, 2); foreach (["theme-editor.php", "plugin-editor.php"] as $editor) { if (in_array($editor, $slugs, true)) { fwrite(STDERR, "FAIL: editor menu visible: ".$editor.PHP_EOL); exit(1); } } echo "EDITOR_MENUS=HIDDEN".PHP_EOL;' \\
+              --path=/var/www/html --allow-root | tee editor-menu.log
+          grep -qx "EDITOR_MENUS=HIDDEN" editor-menu.log
+
       - name: Verify HTTP 403 protections
         shell: bash
         run: |
@@ -116,4 +130,5 @@ jobs:
             constants.log
             http-tests.log
             config-move.log
+            editor-menu.log
           if-no-files-found: ignore
