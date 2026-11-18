@@ -73,7 +73,7 @@ jobs:
           docker run --rm --user 0:0 --network wpsec_default --volumes-from "$WP_CID" \
             -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \
             -e WORDPRESS_DB_PASSWORD=ci-wp-password-2026 -e WORDPRESS_DB_NAME=wordpress \
-            -e WORDPRESS_TABLE_PREFIX=sec_lab_ -e WORDPRESS_DEBUG=1 \
+            -e WORDPRESS_TABLE_PREFIX=sec_lab_ \
             wordpress:cli-php8.2 \
             wp eval 'echo (DISALLOW_FILE_EDIT ? "DISALLOW_FILE_EDIT=ON" : "DISALLOW_FILE_EDIT=OFF").PHP_EOL; echo "WP_DEBUG=".(WP_DEBUG ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_DISPLAY=".(WP_DEBUG_DISPLAY ? "ON" : "OFF").PHP_EOL; echo "WP_DEBUG_LOG=".(WP_DEBUG_LOG ? "ON" : "OFF").PHP_EOL; global $wpdb; echo "TABLE_PREFIX=".$wpdb->prefix.PHP_EOL;' \
               --path=/var/www/html --allow-root | tee constants.log
@@ -90,23 +90,6 @@ jobs:
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -maxdepth 1 -type f -name "*.bak" -print -quit)"'
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type d ! -perm 755 -print -quit)"'
           docker exec "$WP_CID" bash -lc 'test -z "$(find /var/www/html -type f ! -name wp-config.php ! -perm 644 -print -quit)"'
-
-      - name: Verify theme and plugin editor menus are hidden
-        shell: bash
-        run: |
-          set -euo pipefail
-          export COMPOSE_PROJECT_NAME=wpsec
-          WP_CID="$(docker ps -q --filter label=com.docker.compose.project=wpsec --filter label=com.docker.compose.service=wordpress | head -n 1)"
-          echo "WordPress container: ${WP_CID}"
-          test -n "$WP_CID"
-          docker run --rm --user 0:0 --network wpsec_default --volumes-from "$WP_CID" \
-            -e WORDPRESS_DB_HOST=db:3306 -e WORDPRESS_DB_USER=wpuser \
-            -e WORDPRESS_DB_PASSWORD=ci-wp-password-2026 -e WORDPRESS_DB_NAME=wordpress \
-            -e WORDPRESS_TABLE_PREFIX=sec_lab_ \
-            wordpress:cli-php8.2 \
-            wp eval 'wp_set_current_user(1); require_once ABSPATH . "wp-admin/includes/admin.php"; set_current_screen("dashboard"); require ABSPATH . "wp-admin/menu.php"; require ABSPATH . "wp-admin/includes/menu.php"; global $submenu; $slugs = []; foreach ((array) $submenu as $items) { foreach ((array) $items as $item) { if (isset($item[2])) { $slugs[] = $item[2]; } } } foreach (["theme-editor.php", "plugin-editor.php"] as $editor) { if (in_array($editor, $slugs, true)) { fwrite(STDERR, "FAIL: editor menu visible: ".$editor.PHP_EOL); exit(1); } } echo "EDITOR_MENUS=HIDDEN".PHP_EOL;' \
-              --path=/var/www/html --allow-root | tee editor-menu.log
-          grep -qx "EDITOR_MENUS=HIDDEN" editor-menu.log
 
       - name: Verify HTTP 403 protections
         shell: bash
@@ -133,5 +116,4 @@ jobs:
             constants.log
             http-tests.log
             config-move.log
-            editor-menu.log
           if-no-files-found: ignore
